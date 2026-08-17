@@ -191,9 +191,6 @@ public class AgentService
 
         var responseJson = await response.Content.ReadAsStringAsync();
 
-        Console.WriteLine("===== RESPUESTA DE OLLAMA =====");
-        Console.WriteLine(responseJson);
-        Console.WriteLine("================================");
 
         var ollamaResponse = JsonSerializer.Deserialize<OllamaResponse>(
             responseJson,
@@ -220,14 +217,6 @@ public class AgentService
                         new System.Text.Json.Serialization.JsonStringEnumConverter()
                     }
                 });
-
-            Console.WriteLine("===== AGENT RESULT =====");
-            Console.WriteLine(
-                JsonSerializer.Serialize(result, new JsonSerializerOptions
-                {
-                    WriteIndented = true
-                }));
-            Console.WriteLine("========================");
 
             return result;
         }

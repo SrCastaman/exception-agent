@@ -24,6 +24,8 @@ public class AppDbContext : DbContext
 
     public DbSet<Email> Emails { get; set; }
 
+    public DbSet<SupplierEmailEvent> SupplierEmailEvents { get; set; }
+
     public DbSet<OperationalException> OperationalExceptions { get; set; }
 
     public DbSet<ExceptionEvidence> ExceptionEvidences { get; set; }
@@ -69,6 +71,18 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(e => e.SupplierId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<SupplierEmailEvent>()
+            .HasOne<Email>()
+            .WithMany()
+            .HasForeignKey(e => e.EmailId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<SupplierEmailEvent>()
+            .HasOne<PurchaseOrder>()
+            .WithMany()
+            .HasForeignKey(e => e.PurchaseOrderId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<OperationalException>()
             .HasOne(e => e.PurchaseOrder)

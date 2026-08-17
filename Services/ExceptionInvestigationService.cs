@@ -7,8 +7,10 @@ namespace ExceptionAgent.Services;
 public class ExceptionInvestigationService
 {
     private readonly AppDbContext _context;
+    
 
-    public ExceptionInvestigationService(AppDbContext context)
+    public ExceptionInvestigationService(
+        AppDbContext context)
     {
         _context = context;
     }
@@ -61,6 +63,14 @@ public class ExceptionInvestigationService
             .OrderByDescending(e => e.Date)
             .ToListAsync();
 
+
+        var supplierEmailEvents = await _context.SupplierEmailEvents
+            .Where(e => e.PurchaseOrderId == purchaseOrder.Id)
+            .ToListAsync();
+
+
+
+
         return new ExceptionInvestigation
         {
             Exception = exception,
@@ -69,11 +79,13 @@ public class ExceptionInvestigationService
             PurchaseOrderLines = purchaseOrderLines,
             Inventory = inventory,
             CustomerOrders = customerOrders,
-            SupplierEmails = supplierEmails
+            SupplierEmails = supplierEmails,
+            SupplierEmailEvents = supplierEmailEvents
         };
     }
 
-    public InvestigationContext BuildContext(ExceptionInvestigation investigation)
+    public InvestigationContext BuildContext(
+        ExceptionInvestigation investigation)
     {
         var orderedQuantity = investigation.PurchaseOrderLines
             .Sum(line => line.OrderedQuantity);
@@ -91,6 +103,16 @@ public class ExceptionInvestigationService
         var relevantCustomerOrders = investigation.CustomerOrders
             .Where(order => relevantProductIds.Contains(order.ProductId))
             .ToList();
+
+        
+        var latestEmailEvent = investigation.SupplierEmailEvents
+            .Where(e => e.NewExpectedDate.HasValue)
+            .OrderByDescending(e => e.Id)
+            .FirstOrDefault();
+
+        var supplierExpectedDate =
+            latestEmailEvent?.NewExpectedDate
+            ?? investigation.PurchaseOrder.ExpectedDate;
 
         return new InvestigationContext
         {
@@ -132,7 +154,12 @@ public class ExceptionInvestigationService
                         .FirstOrDefault(i => i.ProductId == c.ProductId)?
                         .AvailableQuantity ?? 0;
 
-                    var shortage = Math.Max(0, c.Quantity - stock);
+                    var shortage = Math.Max(
+                        0,
+                        c.Quantity - stock);
+
+                    var supplierDeliveryAfterRequiredDate =
+                        supplierExpectedDate > c.RequiredDate;
 
                     return new CustomerOrderContext
                     {
@@ -141,7 +168,10 @@ public class ExceptionInvestigationService
                         Quantity = c.Quantity,
                         RequiredDate = c.RequiredDate,
                         AvailableStock = stock,
-                        ShortageQuantity = shortage
+                        ShortageQuantity = shortage,
+                        SupplierExpectedDate = supplierExpectedDate,
+                        SupplierDeliveryAfterRequiredDate =
+                            supplierDeliveryAfterRequiredDate
                     };
                 })
                 .ToList(),

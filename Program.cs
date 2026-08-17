@@ -6,7 +6,7 @@ namespace ExceptionAgent
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -15,8 +15,11 @@ namespace ExceptionAgent
                     builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddScoped<ExceptionDetector>();
-            builder.Services.AddHttpClient<AgentService>();
             builder.Services.AddScoped<ExceptionInvestigationService>();
+            builder.Services.AddHttpClient<AgentService>();
+            builder.Services.AddHttpClient<EmailExtractionService>();
+            builder.Services.AddScoped<EmailIngestionService>();
+
 
             // Add services to the container.
             builder.Services.AddRazorPages();
@@ -28,6 +31,11 @@ namespace ExceptionAgent
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
                 DbSeeder.Seed(context);
+
+                var emailIngestionService =
+                    scope.ServiceProvider.GetRequiredService<EmailIngestionService>();
+
+                await emailIngestionService.ProcessEmailsAsync();
             }
 
             // Configure the HTTP request pipeline.

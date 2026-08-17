@@ -15,4 +15,6 @@ public class ExceptionInvestigation
     public List<CustomerOrder> CustomerOrders { get; set; } = new();
 
     public List<Email> SupplierEmails { get; set; } = new();
+
+    public List<SupplierEmailEvent> SupplierEmailEvents { get; set; } = new();
 }

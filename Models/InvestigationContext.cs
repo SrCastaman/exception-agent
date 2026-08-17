@@ -32,6 +32,8 @@ public class PurchaseOrderContext
 
     public DateTime ExpectedDate { get; set; }
 
+    public DateTime? UpdatedExpectedDate { get; set; }
+
     public string Status { get; set; } = string.Empty;
 
     public int OrderedQuantity { get; set; }
@@ -66,6 +68,10 @@ public class CustomerOrderContext
     public int AvailableStock { get; set; }
 
     public int ShortageQuantity { get; set; }
+
+    public DateTime SupplierExpectedDate { get; set; }
+
+    public bool SupplierDeliveryAfterRequiredDate { get; set; }
 }
 
 public class EmailContext
