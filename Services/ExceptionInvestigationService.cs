@@ -7,7 +7,6 @@ namespace ExceptionAgent.Services;
 public class ExceptionInvestigationService
 {
     private readonly AppDbContext _context;
-    
 
     public ExceptionInvestigationService(
         AppDbContext context)
@@ -63,13 +62,9 @@ public class ExceptionInvestigationService
             .OrderByDescending(e => e.Date)
             .ToListAsync();
 
-
         var supplierEmailEvents = await _context.SupplierEmailEvents
             .Where(e => e.PurchaseOrderId == purchaseOrder.Id)
             .ToListAsync();
-
-
-
 
         return new ExceptionInvestigation
         {
@@ -104,7 +99,6 @@ public class ExceptionInvestigationService
             .Where(order => relevantProductIds.Contains(order.ProductId))
             .ToList();
 
-        
         var latestEmailEvent = investigation.SupplierEmailEvents
             .Where(e => e.NewExpectedDate.HasValue)
             .OrderByDescending(e => e.Id)
@@ -113,6 +107,71 @@ public class ExceptionInvestigationService
         var supplierExpectedDate =
             latestEmailEvent?.NewExpectedDate
             ?? investigation.PurchaseOrder.ExpectedDate;
+
+        var customerOrderContexts = new List<CustomerOrderContext>();
+
+        var customerOrdersByProduct = relevantCustomerOrders
+            .GroupBy(order => order.ProductId);
+
+        foreach (var productGroup in customerOrdersByProduct)
+        {
+            var productId = productGroup.Key;
+
+            var availableStock = investigation.Inventory
+                .FirstOrDefault(i => i.ProductId == productId)?
+                .AvailableQuantity ?? 0;
+
+            var remainingStock = availableStock;
+
+            var orderedCustomers = productGroup
+                .OrderBy(order => order.RequiredDate)
+                .ThenBy(order => order.Reference)
+                .ToList();
+
+            foreach (var customerOrder in orderedCustomers)
+            {
+                var allocatedStock = Math.Min(
+                    remainingStock,
+                    customerOrder.Quantity);
+
+                var shortage = customerOrder.Quantity - allocatedStock;
+
+                var supplierDeliveryAfterRequiredDate =
+                    supplierExpectedDate > customerOrder.RequiredDate;
+
+                var atRisk =
+                    shortage > 0 &&
+                    supplierDeliveryAfterRequiredDate;
+
+                customerOrderContexts.Add(new CustomerOrderContext
+                {
+                    Reference = customerOrder.Reference,
+                    ProductId = customerOrder.ProductId,
+                    Quantity = customerOrder.Quantity,
+                    RequiredDate = customerOrder.RequiredDate,
+                    AvailableStock = availableStock,
+                    AllocatedStock = allocatedStock,
+                    ShortageQuantity = shortage,
+                    SupplierExpectedDate = supplierExpectedDate,
+                    SupplierDeliveryAfterRequiredDate =
+                        supplierDeliveryAfterRequiredDate,
+                    AtRisk = atRisk
+                });
+
+                remainingStock -= allocatedStock;
+            }
+
+            
+        }
+
+        var totalShortageQuantity = customerOrderContexts
+                .Where(order => order.AtRisk)
+                .Sum(order => order.ShortageQuantity);
+
+        var calculatedSeverity =
+            customerOrderContexts.Any(order => order.AtRisk)
+                ? "HIGH"
+                : "LOW";
 
         return new InvestigationContext
         {
@@ -147,34 +206,7 @@ public class ExceptionInvestigationService
                 })
                 .ToList(),
 
-            CustomerOrders = relevantCustomerOrders
-                .Select(c =>
-                {
-                    var stock = investigation.Inventory
-                        .FirstOrDefault(i => i.ProductId == c.ProductId)?
-                        .AvailableQuantity ?? 0;
-
-                    var shortage = Math.Max(
-                        0,
-                        c.Quantity - stock);
-
-                    var supplierDeliveryAfterRequiredDate =
-                        supplierExpectedDate > c.RequiredDate;
-
-                    return new CustomerOrderContext
-                    {
-                        Reference = c.Reference,
-                        ProductId = c.ProductId,
-                        Quantity = c.Quantity,
-                        RequiredDate = c.RequiredDate,
-                        AvailableStock = stock,
-                        ShortageQuantity = shortage,
-                        SupplierExpectedDate = supplierExpectedDate,
-                        SupplierDeliveryAfterRequiredDate =
-                            supplierDeliveryAfterRequiredDate
-                    };
-                })
-                .ToList(),
+            CustomerOrders = customerOrderContexts,
 
             Emails = investigation.SupplierEmails
                 .Select(e => new EmailContext
@@ -184,7 +216,10 @@ public class ExceptionInvestigationService
                     Date = e.Date,
                     Body = e.Body
                 })
-                .ToList()
+                .ToList(),
+
+            CalculatedSeverity = calculatedSeverity,
+            TotalShortageQuantity = totalShortageQuantity
         };
     }
 }

@@ -231,9 +231,25 @@
 
                 <p>
                     <strong>Severidad:</strong>
-                    <span class="badge bg-danger">
-                        @Model.AgentResult.Severity
-                    </span>
+
+                    @if (Model.AgentResult.Severity == "HIGH")
+                    {
+                        <span class="badge bg-danger">
+                            HIGH
+                        </span>
+                    }
+                    else if (Model.AgentResult.Severity == "MEDIUM")
+                    {
+                        <span class="badge bg-warning text-dark">
+                            MEDIUM
+                        </span>
+                    }
+                    else if (Model.AgentResult.Severity == "LOW")
+                    {
+                        <span class="badge bg-success">
+                            LOW
+                        </span>
+                    }                   
                 </p>
 
                 <p>

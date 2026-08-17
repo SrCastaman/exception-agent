@@ -13,6 +13,10 @@ public class InvestigationContext
     public List<CustomerOrderContext> CustomerOrders { get; set; } = new();
 
     public List<EmailContext> Emails { get; set; } = new();
+
+    public string CalculatedSeverity { get; set; } = string.Empty;
+
+    public int TotalShortageQuantity { get; set; }
 }
 
 public class ExceptionContext
@@ -67,11 +71,15 @@ public class CustomerOrderContext
     
     public int AvailableStock { get; set; }
 
+    public int AllocatedStock { get; set; }
+
     public int ShortageQuantity { get; set; }
 
     public DateTime SupplierExpectedDate { get; set; }
 
     public bool SupplierDeliveryAfterRequiredDate { get; set; }
+
+    public bool AtRisk { get; set; }
 }
 
 public class EmailContext
