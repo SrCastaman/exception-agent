@@ -1,0 +1,341 @@
+﻿@page "{id:int}"
+@model ExceptionAgent.Pages.Exceptions.DetailsModel
+
+@{
+    ViewData["Title"] = "Detalle de excepción";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Detalle de excepción</h1>
+
+        <a asp-page="/Exceptions/Index" class="btn btn-secondary">
+            Volver
+        </a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+
+            <h3>@Model.Investigation!.Exception.Type</h3>
+
+            <p>
+                <strong>Estado:</strong>
+                @Model.Investigation!.Exception.Status
+            </p>
+
+            <p>
+                <strong>Severidad:</strong>
+                @Model.Investigation!.Exception.Severity
+            </p>
+
+            <p>
+                <strong>Detectada:</strong>
+                @Model.Investigation!.Exception.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+            </p>
+
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Pedido de compra</h4>
+        </div>
+
+        <div class="card-body">
+
+            <p>
+                <strong>Referencia:</strong>
+                @Model.Investigation!.PurchaseOrder.Reference
+            </p>
+
+            <p>
+                <strong>Fecha del pedido:</strong>
+                @Model.Investigation!.PurchaseOrder.OrderDate.ToString("dd/MM/yyyy")
+            </p>
+
+            <p>
+                <strong>Fecha esperada:</strong>
+                @Model.Investigation!.PurchaseOrder.ExpectedDate.ToString("dd/MM/yyyy")
+            </p>
+
+            <p>
+                <strong>Estado:</strong>
+                @Model.Investigation!.PurchaseOrder.Status
+            </p>
+
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Proveedor</h4>
+        </div>
+
+        <div class="card-body">
+
+            <p>
+                <strong>Nombre:</strong>
+                @Model.Investigation!.Supplier.Name
+            </p>
+
+            <p>
+                <strong>Email:</strong>
+                @Model.Investigation!.Supplier.Email
+            </p>
+
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Líneas del pedido</h4>
+        </div>
+
+        <div class="card-body">
+
+            @foreach (var line in Model.Investigation!.PurchaseOrderLines)
+            {
+                <p>
+                    Producto ID: @line.ProductId |
+                    Pedidas: @line.OrderedQuantity |
+                    Recibidas: @line.ReceivedQuantity
+                </p>
+            }
+
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Stock</h4>
+        </div>
+
+        <div class="card-body">
+
+            @if (!Model.Investigation!.Inventory.Any())
+            {
+                <p>No hay información de stock.</p>
+            }
+            else
+            {
+                foreach (var inventory in Model.Investigation!.Inventory)
+                {
+                    <p>
+                        Producto ID: @inventory.ProductId |
+                        Disponible: @inventory.AvailableQuantity
+                    </p>
+                }
+            }
+
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Pedidos de clientes</h4>
+        </div>
+
+        <div class="card-body">
+
+            @if (!Model.Investigation!.CustomerOrders.Any())
+            {
+                <p>No hay pedidos de clientes relacionados.</p>
+            }
+            else
+            {
+                foreach (var order in Model.Investigation!.CustomerOrders)
+                {
+                    <p>
+                        <strong>@order.Reference</strong> |
+                        Cantidad: @order.Quantity |
+                        Fecha necesaria:
+                        @order.RequiredDate.ToString("dd/MM/yyyy")
+                    </p>
+                }
+            }
+
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Emails del proveedor</h4>
+        </div>
+
+        <div class="card-body">
+
+            @if (!Model.Investigation!.SupplierEmails.Any())
+            {
+                <p>No hay emails relacionados.</p>
+            }
+            else
+            {
+                foreach (var email in Model.Investigation!.SupplierEmails)
+                {
+                    <div class="mb-3">
+                        <strong>@email.Subject</strong>
+
+                        <br />
+
+                        <small class="text-muted">
+                            @email.Date.ToString("dd/MM/yyyy HH:mm")
+                        </small>
+
+                        <p>
+                            @email.Body
+                        </p>
+                    </div>
+                }
+            }
+
+        </div>
+
+    </div>
+
+    <hr />
+
+    <h2>Contexto para el agente</h2>
+
+    <pre>
+    @System.Text.Json.JsonSerializer.Serialize(
+        Model.Context,
+        new System.Text.Json.JsonSerializerOptions
+        {
+            WriteIndented = true
+        })
+    </pre>
+
+
+    <hr />
+
+    <hr />
+
+    <h2 class="mb-3">Análisis del agente</h2>
+
+    @if (Model.AgentResult == null)
+    {
+        <div class="alert alert-warning">
+            El agente no ha devuelto ningún resultado.
+        </div>
+    }
+    else
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Conclusión</h4>
+            </div>
+
+            <div class="card-body">
+
+                <p>
+                    <strong>Severidad:</strong>
+                    <span class="badge bg-danger">
+                        @Model.AgentResult.Severity
+                    </span>
+                </p>
+
+                <p>
+                    <strong>Causa:</strong>
+                    @Model.AgentResult.Cause
+                </p>
+
+
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Impacto</h4>
+            </div>
+
+            <div class="card-body">
+
+                <p>
+                    <strong>Pedidos afectados:</strong>
+                    @if (Model.AgentResult.Impact.AffectedCustomerOrders.Any())
+                    {
+                        @string.Join(", ", Model.AgentResult.Impact.AffectedCustomerOrders)
+                    }
+                    else
+                    {
+                        <span>Ninguno</span>
+                    }
+                </p>
+
+                <p>
+                    <strong>Déficit:</strong>
+                    @Model.AgentResult.Impact.ShortageQuantity unidades
+                </p>
+
+                <p>
+                    <strong>Fecha de riesgo:</strong>
+                    @if (Model.AgentResult.Impact.RiskDate.HasValue)
+                    {
+                        @Model.AgentResult.Impact.RiskDate.Value.ToString("dd/MM/yyyy")
+                    }
+                    else
+                    {
+                        <span>No determinada</span>
+                    }
+                </p>
+
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Acciones propuestas</h4>
+            </div>
+
+            <div class="card-body">
+
+                @if (!Model.AgentResult.ProposedActions.Any())
+                {
+                    <p>No se han propuesto acciones.</p>
+                }
+                else
+                {
+                    <ul>
+                        @foreach (var action in Model.AgentResult.ProposedActions)
+                        {
+                            <li class="mb-2">
+                                <strong>@action.Type:</strong>
+                                @action.Reason
+                            </li>
+                        }
+                    </ul>
+                }
+
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Evidencias</h4>
+            </div>
+
+            <div class="card-body">
+
+                @if (!Model.AgentResult.Evidence.Any())
+                {
+                    <p>No se han encontrado evidencias.</p>
+                }
+                else
+                {
+                    <ul>
+                        @foreach (var evidence in Model.AgentResult.Evidence)
+                        {
+                            <li class="mb-2">
+                                @evidence.Description
+                            </li>
+                        }
+                    </ul>
+                }
+
+            </div>
+        </div>
+    }
+
+</div>

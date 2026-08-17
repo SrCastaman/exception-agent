@@ -1,0 +1,18 @@
+﻿# Build
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.rsuser
+
+# SQLite
+*.db
+*.db-shm
+*.db-wal
+
+# Environment / secrets
+.env
+appsettings.Local.json

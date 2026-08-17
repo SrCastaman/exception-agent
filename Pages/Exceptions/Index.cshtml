@@ -1,0 +1,108 @@
+﻿@page
+@model ExceptionAgent.Pages.Exceptions.IndexModel
+
+@{
+    ViewData["Title"] = "Excepciones";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Excepciones</h1>
+
+        <form method="post">
+            <button type="submit" class="btn btn-primary">
+                Detectar excepciones
+            </button>
+        </form>
+    </div>
+
+    @if (!Model.Exceptions.Any())
+    {
+        <div class="alert alert-info">
+            No hay excepciones detectadas.
+        </div>
+    }
+    else
+    {
+        foreach (var exception in Model.Exceptions)
+        {
+            <div class="card mb-3">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+                            <h5 class="card-title">
+                                <a asp-page="/Exceptions/Details"
+                                   asp-route-id="@exception.Id">
+                                    @exception.Type
+                                </a>
+                            </h5>
+
+                            @if (exception.PurchaseOrder != null)
+                            {
+                                <p class="mb-1">
+                                    <strong>Pedido:</strong>
+                                    @exception.PurchaseOrder.Reference
+                                </p>
+                            }
+
+                            <p class="mb-1">
+                                <strong>Severidad:</strong>
+                                @exception.Severity
+                            </p>
+
+                            <p class="mb-1">
+                                <strong>Estado:</strong>
+                                @exception.Status
+                            </p>
+                        </div>
+
+                        <div>
+                            <span class="badge bg-danger">
+                                @exception.Severity
+                            </span>
+                        </div>
+
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(exception.Cause))
+                    {
+                        <hr />
+
+                        <p>
+                            <strong>Causa:</strong><br />
+                            @exception.Cause
+                        </p>
+                    }
+
+                    @if (!string.IsNullOrEmpty(exception.Impact))
+                    {
+                        <p>
+                            <strong>Impacto:</strong><br />
+                            @exception.Impact
+                        </p>
+                    }
+
+                    @if (!string.IsNullOrEmpty(exception.ProposedAction))
+                    {
+                        <p>
+                            <strong>Acción propuesta:</strong><br />
+                            @exception.ProposedAction
+                        </p>
+                    }
+
+                    <small class="text-muted">
+                        Detectada:
+                        @exception.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                    </small>
+
+                </div>
+
+            </div>
+        }
+    }
+
+</div>
