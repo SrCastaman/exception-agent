@@ -1,0 +1,12 @@
+﻿namespace ExceptionAgent.Application.Allocation.Models;
+
+public class Supply
+{
+    public string Reference { get; set; } = string.Empty;
+
+    public int ProductId { get; set; }
+
+    public int Quantity { get; set; }
+
+    public DateTime AvailableDate { get; set; }
+}
