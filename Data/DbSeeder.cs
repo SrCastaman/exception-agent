@@ -1,4 +1,4 @@
-﻿using ExceptionAgent.Models;
+﻿using ExceptionAgent.Domain.Entities;
 
 namespace ExceptionAgent.Data
 {
@@ -31,7 +31,15 @@ namespace ExceptionAgent.Data
                 Name = "Sensor S50"
             };
 
-            context.Products.AddRange(motor, sensor);
+            var component = new Product
+            {
+                Reference = "CMP-C10",
+                Name = "Component C10"
+            };
+
+            
+
+            context.Products.AddRange(motor, sensor, component);
 
             context.SaveChanges();
 
@@ -77,10 +85,60 @@ namespace ExceptionAgent.Data
                 Status = "PartiallyReceived"
             };
 
+            var relativeDateOrder = new PurchaseOrder
+            {
+                Reference = "PO-1045",
+                SupplierId = supplier.Id,
+                OrderDate = new DateTime(2026, 8, 16),
+                ExpectedDate = new DateTime(2026, 8, 18),
+                Status = "PartiallyReceived"
+            };
+
+            var unknownDateOrder = new PurchaseOrder
+            {
+                Reference = "PO-1046",
+                SupplierId = supplier.Id,
+                OrderDate = new DateTime(2026, 8, 16),
+                ExpectedDate = new DateTime(2026, 8, 18),
+                Status = "PartiallyReceived"
+            };
+
+            var noReferenceOrder = new PurchaseOrder
+            {
+                Reference = "PO-1047",
+                SupplierId = supplier.Id,
+                OrderDate = new DateTime(2026, 8, 16),
+                ExpectedDate = new DateTime(2026, 8, 18),
+                Status = "PartiallyReceived"
+            };
+
+            var ambiguousOrder = new PurchaseOrder
+            {
+                Reference = "PO-1048",
+                SupplierId = supplier.Id,
+                OrderDate = new DateTime(2026, 8, 16),
+                ExpectedDate = new DateTime(2026, 8, 18),
+                Status = "PartiallyReceived"
+            };
+
+            var secondAmbiguousOrder = new PurchaseOrder
+            {
+                Reference = "PO-1049",
+                SupplierId = supplier.Id,
+                OrderDate = new DateTime(2026, 8, 16),
+                ExpectedDate = new DateTime(2026, 8, 18),
+                Status = "PartiallyReceived"
+            };
+
             context.PurchaseOrders.AddRange(
                 delayedOrder,
                 stockSufficientOrder,
-                multipleCustomersOrder
+                multipleCustomersOrder,
+                relativeDateOrder,
+                unknownDateOrder,
+                noReferenceOrder,
+                ambiguousOrder,
+                secondAmbiguousOrder
             );
 
             context.SaveChanges();
@@ -92,7 +150,7 @@ namespace ExceptionAgent.Data
                 PurchaseOrderId = delayedOrder.Id,
                 ProductId = motor.Id,
                 OrderedQuantity = 100,
-                ReceivedQuantity = 60
+                ReceivedQuantity = 50
             };
 
             var stockSufficientOrderLine = new PurchaseOrderLine
@@ -111,10 +169,57 @@ namespace ExceptionAgent.Data
                 ReceivedQuantity = 20
             };
 
+            var relativeDateOrderLine = new PurchaseOrderLine
+            {
+                PurchaseOrderId = relativeDateOrder.Id,
+                ProductId = component.Id,
+                OrderedQuantity = 25,
+                ReceivedQuantity = 0
+            };
+
+            var unknownDateOrderLine = new PurchaseOrderLine
+            {
+                PurchaseOrderId = unknownDateOrder.Id,
+                ProductId = component.Id,
+                OrderedQuantity = 15,
+                ReceivedQuantity = 0
+            };
+
+            var noReferenceOrderLine = new PurchaseOrderLine
+            {
+                PurchaseOrderId = noReferenceOrder.Id,
+                ProductId = component.Id,
+                OrderedQuantity = 30,
+                ReceivedQuantity = 0
+            };
+
+            var ambiguousOrderLine = new PurchaseOrderLine
+            {
+                PurchaseOrderId = ambiguousOrder.Id,
+                ProductId = component.Id,
+                OrderedQuantity = 40,
+                ReceivedQuantity = 0
+            };
+
+            var secondAmbiguousOrderLine = new PurchaseOrderLine
+            {
+                PurchaseOrderId = secondAmbiguousOrder.Id,
+                ProductId = component.Id,
+                OrderedQuantity = 40,
+                ReceivedQuantity = 0
+            };
+
+
+
             context.PurchaseOrderLines.AddRange(
                 delayedOrderLine,
                 stockSufficientOrderLine,
-                multipleCustomersOrderLine
+                multipleCustomersOrderLine,
+                relativeDateOrderLine,
+                unknownDateOrderLine,
+                noReferenceOrderLine,
+                ambiguousOrderLine,
+                secondAmbiguousOrderLine
             );
 
             // Inventario
@@ -131,9 +236,17 @@ namespace ExceptionAgent.Data
                 AvailableQuantity = 80
             };
 
+            var componentInventory = new Inventory
+            {
+                ProductId = component.Id,
+                AvailableQuantity = 0
+            };
+
+
             context.Inventories.AddRange(
                 motorInventory,
-                sensorInventory
+                sensorInventory,
+                componentInventory
             );
 
             // --------------------------------------------------
@@ -176,11 +289,38 @@ namespace ExceptionAgent.Data
                 RequiredDate = new DateTime(2026, 8, 19)
             };
 
+            var customerOrder5 = new CustomerOrder
+            {
+                Reference = "CO-8825",
+                ProductId = component.Id,
+                Quantity = 20,
+                RequiredDate = new DateTime(2026, 8, 18)
+            };
+
+            var unknownDateCustomerOrder = new CustomerOrder
+            {
+                Reference = "CO-8826",
+                ProductId = component.Id,
+                Quantity = 20,
+                RequiredDate = new DateTime(2026, 8, 19)
+            };
+
+            var noReferenceCustomerOrder = new CustomerOrder
+            {
+                Reference = "CO-8827",
+                ProductId = component.Id,
+                Quantity = 20,
+                RequiredDate = new DateTime(2026, 8, 19)
+            };
+
             context.CustomerOrders.AddRange(
                 customerOrder1,
                 customerOrder2,
                 customerOrder3,
-                customerOrder4
+                customerOrder4,
+                customerOrder5,
+                unknownDateCustomerOrder,
+                noReferenceCustomerOrder
             );
 
             // --------------------------------------------------
@@ -194,7 +334,7 @@ namespace ExceptionAgent.Data
                 Subject = "Retraso PO-1042",
                 Date = new DateTime(2026, 8, 16),
                 Body =
-                    "Buenos días. Las 40 unidades restantes del pedido PO-1042 sufrirán un retraso y llegarán el 20/08. Un saludo.",
+                    "Buenos días. Las 50 unidades restantes del pedido PO-1042 sufrirán un retraso y llegarán el 20/08. Un saludo.",
                 SupplierId = supplier.Id
             };
 
@@ -224,10 +364,58 @@ namespace ExceptionAgent.Data
                 SupplierId = supplier.Id
             };
 
+            var email1045 = new Email
+            {
+                Sender = "compras@abcindustrial.es",
+                Recipient = "compras@nuestraempresa.es",
+                Subject = "Actualización de entrega",
+                Date = new DateTime(2026, 8, 16),
+                Body =
+                    "Buenos días. Finalmente no podremos cumplir la fecha prevista del pedido PO-1045. Las 25 unidades llegarán el próximo miércoles. Un saludo.",
+                SupplierId = supplier.Id
+            };
+
+            var email1046 = new Email
+            {
+                Sender = "compras@abcindustrial.es",
+                Recipient = "compras@nuestraempresa.es",
+                Subject = "Retraso PO-1046",
+                Date = new DateTime(2026, 8, 16),
+                Body =
+                    "Buenos días. La entrega del pedido PO-1046 sufrirá un retraso de unos días. Os avisaremos cuando tengamos una nueva fecha. Un saludo.",
+                SupplierId = supplier.Id
+            };
+
+            var email1047 = new Email
+            {
+                Sender = "compras@abcindustrial.es",
+                Recipient = "compras@nuestraempresa.es",
+                Subject = "Actualización de entrega",
+                Date = new DateTime(2026, 8, 16),
+                Body =
+                    "Buenos días. Las 30 unidades restantes sufrirán un retraso y llegarán el 20/08. Un saludo.",
+                SupplierId = supplier.Id
+            };
+
+            var ambiguousEmail = new Email
+            {
+                Sender = "compras@abcindustrial.es",
+                Recipient = "compras@nuestraempresa.es",
+                Subject = "Actualización de entrega",
+                Date = new DateTime(2026, 8, 16),
+                Body =
+                    "Buenos días. Las 40 unidades restantes sufrirán un retraso y llegarán el 20/08. Un saludo.",
+                SupplierId = supplier.Id
+            };
+
             context.Emails.AddRange(
                 email1042,
                 email1043,
-                email1044
+                email1044,
+                email1045,
+                email1046,
+                email1047,
+                ambiguousEmail
             );
 
             context.SaveChanges();

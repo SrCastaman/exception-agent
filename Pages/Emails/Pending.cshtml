@@ -1,0 +1,141 @@
+﻿@page
+@model ExceptionAgent.Pages.Emails.PendingModel
+
+@{
+    ViewData["Title"] = "Emails pendientes";
+}
+
+<div class="container mt-4">
+
+    <h1 class="mb-2">Emails pendientes de revisión</h1>
+
+    <p class="text-muted mb-4">
+        Emails que el sistema no ha podido asociar automáticamente a un pedido.
+    </p>
+
+    @if (!Model.PendingEmails.Any())
+    {
+        <div class="alert alert-success">
+            No hay emails pendientes de revisión.
+        </div>
+    }
+    else
+    {
+        @foreach (var result in Model.PendingEmails)
+        {
+            <div class="card mb-4 shadow-sm">
+
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <strong>
+                        Email #@result.EmailId
+                    </strong>
+
+                    <span class="badge bg-warning text-dark">
+                        PendingReview
+                    </span>
+                </div>
+
+                <div class="card-body">
+
+                    <p>
+                        <strong>Remitente:</strong>
+                        @result.Email.Sender
+                    </p>
+
+                    <p>
+                        <strong>Asunto:</strong>
+                        @result.Email.Subject
+                    </p>
+
+                    <p>
+                        <strong>Fecha:</strong>
+                        @result.Email.Date.ToString("dd/MM/yyyy")
+                    </p>
+
+                    <hr />
+
+                    <p>
+                        <strong>Email:</strong>
+                    </p>
+
+                    <div class="border rounded p-3 bg-light mb-3">
+                        @result.Email.Body
+                    </div>
+
+                    <p>
+                        <strong>Score:</strong>
+                        @result.MatchScore.ToString("0.00")
+                    </p>
+
+                    <p>
+                        <strong>Motivo:</strong>
+                        @result.MatchingReason
+                    </p>
+
+                    <hr />
+
+                    <h5>Candidatos</h5>
+
+                    @if (!result.Candidates.Any())
+                    {
+                        <p class="text-muted">
+                            No se encontraron candidatos.
+                        </p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Pedido</th>
+                                        <th>Score</th>
+                                        <th>Motivos</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @foreach (var candidate in result.Candidates)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @candidate.PurchaseOrder.Reference
+                                            </td>
+                                            <td>
+                                                @candidate.Score.ToString("0.00")
+                                            </td>
+                                            <td>
+                                                @candidate.Reasons
+                                            </td>
+
+                                            <td>
+                                                <form method="post">
+                                                    <input type="hidden"
+                                                           name="processingResultId"
+                                                           value="@result.Id" />
+
+                                                    <input type="hidden"
+                                                           name="purchaseOrderId"
+                                                           value="@candidate.PurchaseOrderId" />
+
+                                                    <button type="submit"
+                                                            asp-page-handler="Assign"
+                                                            class="btn btn-sm btn-primary">
+                                                        Asignar
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        }
+    }
+
+</div>

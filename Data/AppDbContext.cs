@@ -1,4 +1,4 @@
-﻿using ExceptionAgent.Models;
+﻿using ExceptionAgent.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExceptionAgent.Data;
@@ -29,6 +29,8 @@ public class AppDbContext : DbContext
     public DbSet<OperationalException> OperationalExceptions { get; set; }
 
     public DbSet<ExceptionEvidence> ExceptionEvidences { get; set; }
+
+    public DbSet<EmailProcessingResult> EmailProcessingResults => Set<EmailProcessingResult>();
 
 
 

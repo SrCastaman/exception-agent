@@ -51,19 +51,37 @@
 
                             <p class="mb-1">
                                 <strong>Severidad:</strong>
-                                @exception.Severity
+
+                                @if (exception.Severity == "HIGH")
+                                {
+                                    <span class="badge bg-danger">
+                                        HIGH
+                                    </span>
+                                }
+                                else if (exception.Severity == "MEDIUM")
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        MEDIUM
+                                    </span>
+                                }
+                                else if (exception.Severity == "LOW")
+                                {
+                                    <span class="badge bg-success">
+                                        LOW
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        @exception.Severity
+                                    </span>
+                                }
                             </p>
 
                             <p class="mb-1">
                                 <strong>Estado:</strong>
                                 @exception.Status
                             </p>
-                        </div>
-
-                        <div>
-                            <span class="badge bg-danger">
-                                @exception.Severity
-                            </span>
                         </div>
 
                     </div>

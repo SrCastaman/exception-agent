@@ -1,5 +1,6 @@
-using ExceptionAgent.Models;
-using ExceptionAgent.Services;
+using ExceptionAgent.Aplication.Exceptions;
+using ExceptionAgent.Contracts;
+using ExceptionAgent.Infraestructure.AI;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 

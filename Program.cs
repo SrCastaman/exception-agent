@@ -1,5 +1,7 @@
+using ExceptionAgent.Aplication.Email;
+using ExceptionAgent.Aplication.Exceptions;
 using ExceptionAgent.Data;
-using ExceptionAgent.Services;
+using ExceptionAgent.Infraestructure.AI;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExceptionAgent
@@ -19,6 +21,8 @@ namespace ExceptionAgent
             builder.Services.AddHttpClient<AgentService>();
             builder.Services.AddHttpClient<EmailExtractionService>();
             builder.Services.AddScoped<EmailIngestionService>();
+            builder.Services.AddScoped<EmailMatchingService>();
+            builder.Services.AddScoped<ExceptionRiskCalculationService>();
 
 
             // Add services to the container.

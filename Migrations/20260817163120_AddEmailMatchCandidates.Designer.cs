@@ -3,6 +3,7 @@ using System;
 using ExceptionAgent.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExceptionAgent.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260817163120_AddEmailMatchCandidates")]
+    partial class AddEmailMatchCandidates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.11");
@@ -112,19 +115,8 @@ namespace ExceptionAgent.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AffectedQuantity")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("EmailId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("EventType")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Evidence")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<double>("MatchScore")
                         .HasColumnType("REAL");
@@ -135,9 +127,6 @@ namespace ExceptionAgent.Migrations
 
                     b.Property<int>("MatchingStatus")
                         .HasColumnType("INTEGER");
-
-                    b.Property<DateTime?>("NewExpectedDate")
-                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("ProcessedAt")
                         .HasColumnType("TEXT");

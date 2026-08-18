@@ -3,6 +3,7 @@ using System;
 using ExceptionAgent.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExceptionAgent.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260817162144_AddEmailProcessingResults")]
+    partial class AddEmailProcessingResults
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.11");
@@ -78,53 +81,14 @@ namespace ExceptionAgent.Migrations
                     b.ToTable("Emails");
                 });
 
-            modelBuilder.Entity("ExceptionAgent.Models.EmailMatchCandidate", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("EmailProcessingResultId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PurchaseOrderId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Reasons")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<double>("Score")
-                        .HasColumnType("REAL");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmailProcessingResultId");
-
-                    b.HasIndex("PurchaseOrderId");
-
-                    b.ToTable("EmailMatchCandidate");
-                });
-
             modelBuilder.Entity("ExceptionAgent.Models.EmailProcessingResult", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AffectedQuantity")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("EmailId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("EventType")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Evidence")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<double>("MatchScore")
                         .HasColumnType("REAL");
@@ -135,9 +99,6 @@ namespace ExceptionAgent.Migrations
 
                     b.Property<int>("MatchingStatus")
                         .HasColumnType("INTEGER");
-
-                    b.Property<DateTime?>("NewExpectedDate")
-                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("ProcessedAt")
                         .HasColumnType("TEXT");
@@ -390,25 +351,6 @@ namespace ExceptionAgent.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
                 });
 
-            modelBuilder.Entity("ExceptionAgent.Models.EmailMatchCandidate", b =>
-                {
-                    b.HasOne("ExceptionAgent.Models.EmailProcessingResult", "EmailProcessingResult")
-                        .WithMany("Candidates")
-                        .HasForeignKey("EmailProcessingResultId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ExceptionAgent.Models.PurchaseOrder", "PurchaseOrder")
-                        .WithMany()
-                        .HasForeignKey("PurchaseOrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("EmailProcessingResult");
-
-                    b.Navigation("PurchaseOrder");
-                });
-
             modelBuilder.Entity("ExceptionAgent.Models.EmailProcessingResult", b =>
                 {
                     b.HasOne("ExceptionAgent.Models.Email", "Email")
@@ -492,11 +434,6 @@ namespace ExceptionAgent.Migrations
                         .HasForeignKey("PurchaseOrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("ExceptionAgent.Models.EmailProcessingResult", b =>
-                {
-                    b.Navigation("Candidates");
                 });
 
             modelBuilder.Entity("ExceptionAgent.Models.PurchaseOrder", b =>
