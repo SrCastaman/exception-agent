@@ -1,10 +1,14 @@
 # ExceptionAgent
 
-> **AI-powered operational exception analysis for procurement and supply chain.**
+> **AI-powered operational exception analysis for procurement and supply chain, using deterministic business logic and a local LLM.**
 
-ExceptionAgent is a .NET application designed to help procurement, supply chain and operations teams investigate supplier-related exceptions such as delayed purchase orders.
+**Status:** Prototype / portfolio project
 
-Instead of simply detecting that a purchase order is late, ExceptionAgent combines operational data from purchase orders, inventory and customer demand to determine **what the delay actually affects, how much impact it creates, and why**. A local LLM (Qwen 3 via Ollama) then turns the deterministic analysis into a structured diagnosis and actionable explanation.
+ExceptionAgent is a .NET application designed to help procurement, supply chain and operations teams investigate supplier-related operational exceptions such as delayed purchase orders.
+
+Instead of simply detecting that a purchase order is late, ExceptionAgent combines operational data from purchase orders, inventory and customer demand to determine **what the delay actually affects, how much impact it creates, and why**.
+
+A local LLM, **Qwen3:8b running through Ollama**, then turns the deterministic analysis into a structured diagnosis and human-readable explanation.
 
 ---
 
@@ -55,11 +59,41 @@ Structured diagnosis
 Web UI
 ```
 
-The key design principle is that **the LLM is not responsible for the core business calculations**.
+The key architectural principle is that **the LLM is not responsible for critical business calculations**.
 
-C# determines the operational facts. The LLM interprets and explains those facts.
+C# determines the operational facts using deterministic business logic. The LLM receives those already-calculated facts and is responsible for interpreting, summarizing and communicating them.
+
+This separation is intended to reduce the risk of hallucinated quantities, dates or shortages while keeping the AI layer replaceable.
 
 ---
+
+---
+
+## Screenshots
+
+### Exception Dashboard
+
+The main dashboard provides an overview of the operational exceptions detected by the system, including their severity, status and associated purchase orders.
+
+![Exception Dashboard](docs/images/screenshot1.png)
+
+### Exception Details
+
+The exception details view provides the operational context behind a detected problem, including the purchase order, supplier, dates and quantities involved.
+
+![Exception Details](docs/images/screenshot2.png)
+
+### Impact Analysis
+
+This view shows the deterministic impact analysis, including affected customer demand and the consequences of the detected exception.
+
+![Impact Analysis](docs/images/screenshot3.png)
+
+### AI Investigation
+
+Qwen3 receives the structured investigation context and generates a diagnosis explaining the likely cause, impact and possible actions.
+
+![AI Investigation](docs/images/screenshot4.png)
 
 ## Core architecture
 
@@ -73,7 +107,7 @@ The application separates email ingestion/matching from the later exception inve
 
 The system identifies operational problems such as delayed purchase orders and creates an `OperationalException` describing the detected issue.
 
-### 3. Deterministic risk calculation
+### 3. Deterministic Impact and Risk Calculation
 
 Before calling the LLM, the application calculates the operational impact using application code.
 
@@ -97,8 +131,7 @@ The allocation engine answers a fundamental operational question:
 
 > **Given the supply available on each date, which customer demands can actually be covered?**
 
-The current prototype uses a deterministic date-priority allocation policy.
-
+The current prototype uses a deterministic **date-priority allocation policy**, meaning customer demand is evaluated according to required delivery date and only supply available in time can satisfy that demand.
 ```text
 Supply
 ├── STOCK
