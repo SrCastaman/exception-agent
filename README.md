@@ -75,25 +75,25 @@ This separation is intended to reduce the risk of hallucinated quantities, dates
 
 The main dashboard provides an overview of the operational exceptions detected by the system, including their severity, status and associated purchase orders.
 
-![Exception Dashboard](docs/images/screenshot1.png)
+![Exception Dashboard](Docs/images/screenshot1.png)
 
 ### Exception Details
 
 The exception details view provides the operational context behind a detected problem, including the purchase order, supplier, dates and quantities involved.
 
-![Exception Details](docs/images/screenshot2.png)
+![Exception Details](Docs/images/screenshot2.png)
 
 ### Impact Analysis
 
 This view shows the deterministic impact analysis, including affected customer demand and the consequences of the detected exception.
 
-![Impact Analysis](docs/images/screenshot3.png)
+![Impact Analysis](Docs/images/screenshot3.png)
 
 ### AI Investigation
 
 Qwen3 receives the structured investigation context and generates a diagnosis explaining the likely cause, impact and possible actions.
 
-![AI Investigation](docs/images/screenshot4.png)
+![AI Investigation](Docs/images/screenshot4.png)
 
 ## Core architecture
 
